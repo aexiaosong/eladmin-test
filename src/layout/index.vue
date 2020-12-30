@@ -12,6 +12,8 @@
         <settings />
       </right-panel>
     </div>
+    <!--  防止刷新后主题丢失  -->
+    <Theme v-show="false" ref="theme" />
   </div>
 </template>
 
@@ -20,7 +22,8 @@ import RightPanel from '@/components/RightPanel'
 import { AppMain, Navbar, Settings, Sidebar, TagsView } from './components'
 import ResizeMixin from './mixin/ResizeHandler'
 import { mapState } from 'vuex'
-
+import Theme from '@/components/ThemePicker'
+import Cookies from 'js-cookie'
 export default {
   name: 'Layout',
   components: {
@@ -29,7 +32,8 @@ export default {
     RightPanel,
     Settings,
     Sidebar,
-    TagsView
+    TagsView,
+    Theme
   },
   mixins: [ResizeMixin],
   computed: {
@@ -49,6 +53,15 @@ export default {
       }
     }
   },
+  mounted() {
+    if (Cookies.get('theme')) {
+      this.$refs.theme.theme = Cookies.get('theme')
+      this.$store.dispatch('settings/changeSetting', {
+        key: 'theme',
+        value: Cookies.get('theme')
+      })
+    }
+  },
   methods: {
     handleClickOutside() {
       this.$store.dispatch('app/closeSideBar', { withoutAnimation: false })
@@ -58,8 +71,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  @import "~@/styles/mixin.scss";
-  @import "~@/styles/variables.scss";
+  @import "~@/assets/styles/mixin.scss";
+  @import "~@/assets/styles/variables.scss";
 
   .app-wrapper {
     @include clearfix;
@@ -87,9 +100,10 @@ export default {
     position: fixed;
     top: 0;
     right: 0;
-    z-index: 9;
+    z-index: 12;
     width: calc(100% - #{$sideBarWidth});
     transition: width 0.28s;
+    padding: 0;
   }
 
   .hideSidebar .fixed-header {
